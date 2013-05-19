@@ -1,0 +1,73 @@
+	在 man 2 open 中
+	同步I/O：
+	O_SYNC The file is opened for synchronous I/O.  Any write(2)s on the resulting file descriptor will  block
+              the calling process until the data has been physically written to the underlying hardware.  But see
+              NOTES below.
+           (同步I/O就是：任何对该文件的 write 操作都会阻塞调用 write 的进程，直到数据写到底层的硬件设备上)
+
+
+       O_ASYNC
+              Enable signal-driven I/O: generate a signal  (SIGIO  by  default,  but  this  can  be  changed  via
+              fcntl(2))  when  input  or  output  becomes possible on this file descriptor.  This feature is only
+              available for terminals, pseudo-terminals, sockets, and (since Linux 2.6)  pipes  and  FIFOs.   See
+              fcntl(2) for further details.
+
+NOTES
+       Under Linux, the O_NONBLOCK flag indicates that one wants to open but does not necessarily have the inten-
+       tion  to  read or write.  This is typically used to open devices in order to get a file descriptor for use
+       with ioctl(2).
+       (在Liunx下面，O_NONBLOCK标记意味着想要打开文件，但是不一定进行读写，典型的用于想要获得一个文件的描述符，以便用于 ioctl())
+
+       Unlike the other values that can be specified in flags, the access mode  values  O_RDONLY,  O_WRONLY,  and
+       O_RDWR,  do  not  specify  individual  bits.  Rather, they define the low order two bits of flags, and are
+       defined respectively as 0, 1, and 2.  In other words, the combination O_RDONLY |  O_WRONLY  is  a  logical
+       error,  and  certainly does not have the same meaning as O_RDWR.  Linux reserves the special, non-standard
+       access mode 3 (binary 11) in flags to mean: check for read and write permission on the file and  return  a
+       descriptor that can’t be used for reading or writing.  This non-standard access mode is used by some Linux
+       drivers to return a descriptor that is only to be used for device-specific ioctl(2) operations.
+
+       The (undefined) effect of O_RDONLY | O_TRUNC varies among implementations.  On many systems  the  file  is
+       actually truncated.
+
+       There  are many infelicities in the protocol underlying NFS, affecting amongst others O_SYNC and O_NDELAY.
+
+       POSIX provides for three different variants of  synchronized  I/O,  corresponding  to  the  flags  O_SYNC,
+       O_DSYNC and O_RSYNC.  Currently (2.1.130) these are all synonymous under Linux.
+
+       Note that open() can open device special files, but creat() cannot create them; use mknod(2) instead.
+
+       On  NFS  file  systems  with  UID  mapping  enabled, open() may return a file descriptor but, for example,
+       read(2) requests are denied with EACCES.  This is because the client performs open() by checking the  per-
+       missions, but UID mapping is performed by the server upon read and write requests.
+
+       If  the file is newly created, its st_atime, st_ctime, st_mtime fields (respectively, time of last access,
+       time of last status change, and time of last modification; see stat(2)) are set to the current  time,  and
+       so  are  the  st_ctime  and  st_mtime  fields of the parent directory.  Otherwise, if the file is modified
+       because of the O_TRUNC flag, its st_ctime and st_mtime fields are set to the current time.
+
+==================================================================================================================
+NAME
+       ioctl - control device
+
+SYNOPSIS
+       #include <sys/ioctl.h>
+
+       int ioctl(int d, int request, ...);
+
+DESCRIPTION
+       The  ioctl()  function manipulates the underlying device parameters of special files.  In particular, many
+       operating characteristics of character special files (e.g., terminals)  may  be  controlled  with  ioctl()
+       requests.  The argument d must be an open file descriptor.
+
+       The  second argument is a device-dependent request code.  The third argument is an untyped pointer to mem-
+       ory.  It’s traditionally char *argp (from the days before void * was valid C), and will be  so  named  for
+       this discussion.
+
+       An  ioctl()  request  has  encoded in it whether the argument is an in parameter or out parameter, and the
+       size of the argument argp in bytes.  Macros and defines used in specifying an ioctl() request are  located
+       in the file <sys/ioctl.h>.
+
+RETURN VALUE
+       Usually,  on success zero is returned.  A few ioctl() requests use the return value as an output parameter
+       and return a non-negative value on success.  On error, -1 is returned, and errno is set appropriately.
+

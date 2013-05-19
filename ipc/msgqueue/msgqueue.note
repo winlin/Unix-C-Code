@@ -1,0 +1,39 @@
+
+	一般来说，消息队列都有一个消息头，记录着消息队列的重要信息，这个结构是内核维护的，应用程序并不能直接修改使用。但是我们可以通过
+   系统提供的接口来更新或设置消息队列的属性。
+	介绍的是POSIX消息队列：
+NAME
+       mq_open - open a message queue
+
+SYNOPSIS
+       #include <fcntl.h>           /* For O_* constants */
+       #include <sys/stat.h>        /* For mode constants */
+       #include <mqueue.h>
+
+       mqd_t mq_open(const char *name, int oflag);
+       mqd_t mq_open(const char *name, int oflag, mode_t mode,
+                     struct mq_attr *attr);
+
+       Link with -lrt.
+
+      对消息队列的操作与文件操作有结构上的相似。但是他们使用 mqd_t 类型的消息队列描述符来标识一个消息队列，不一定能直接使用文件操作的
+      接口函数，因此消息队列操作都有专用的函数。
+
+      还有一种接口：他们符合 SVr4, POSIX.1-2001.
+NAME
+       msgget - get a message queue identifier
+
+SYNOPSIS
+       #include <sys/types.h>
+       #include <sys/ipc.h>
+       #include <sys/msg.h>
+
+       int msgget(key_t key, int msgflg);
+
+
+       注意：一个消息队列的最大消息数和最大消息长度是在它创建的时候决定的，不能随意修改。
+		阻塞属性的消息队列，其为空时会挂起取消息的进程。
+		
+	POSIX 消息队列实际上对应 mqueue 文件系统中的一个文件，这个文件系统默认不会自动挂载，可以通过如下命令挂载：
+	      sudo mkdir /dev/mqueue
+	      sudo mount -t mqueue none /dev/mqueue

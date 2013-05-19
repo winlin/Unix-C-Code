@@ -1,0 +1,40 @@
+高级进程间通讯
+      基于STREAMS的管道（STREAMS-based pipe） 以及 UNIX域套接字(UNIX domain socket).
+      使用这些IPC，可以在进程间传送打开的文件描述符。
+
+1. 基于STREAMS的管道（STREAMS-based pipe）
+   基于STREAMS的管道（STREAMS-based pipe）是一个双向（全双工）管道。 单个STREAMS管道就能向父、子进程提供双向的数据流。
+   对应的函数是 :
+              s_pipe()
+   
+   就像管道一样，也有命名的STREAMS管道。
+             fattach()
+
+
+2. UNIX域套接字
+    UNIX域套接字用于在同一台机器上运行的进程间通讯。相比因特网套接字可用于同一目的，UNIX域套接字效率更高。
+    UNIX域套接字仅仅复制数据；它们并不执行协议处理，不需要添加或删除网络报头，无须计算检验和，不要产生顺序号，无须发送确认报文。
+    
+    socket()
+    里面有 AF_UNIX AF_LOCAL 就是UNIX域套接字。
+    
+  详见：  man 7 unix
+   
+   同样也有命名套接字，可以 bind 到一个绝对的路径.
+   
+   对应的结构体是:  
+   <sys/un.h>
+   struct sockaddr_un {
+        sa_family_t sun_family;      /*AF_UNIX*/
+        char        sun_path[108];   /*pathname*/
+   };
+
+
+3. 传送文件描述符   P482
+
+
+
+  
+ 
+
+

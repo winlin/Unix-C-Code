@@ -1,0 +1,60 @@
+存储映射I/O
+        存储映射I/O使一个磁盘文件与存储空间中的一个缓冲区相映射。 于是当从缓冲区取数据，就相当于读文件中的相应字节；与此类似，将数据存入缓冲区，
+  则相应的字节就自动的写入文件。这样就可以在不使用read/write的函数下实现I/O。
+
+  #include <sys/mman.h>
+
+       void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
+       int munmap(void *addr, size_t length);
+
+
+   与映射存储区域相关的有：
+             SIGSEGV： 通常用于指示进程试图访问对它不可用的区域
+	     SIGBUS ： 如果访问映射区的某个部分，而在访问时这一部分实际上已经不存在了
+
+----------------------------------------
+ NAME
+       mprotect - set protection on a region of memory
+
+ SYNOPSIS
+       #include <sys/mman.h>
+
+       int mprotect(const void *addr, size_t len, int prot);
+
+       mprotect()函数可以更改一个现存映射存储区的权限。
+
+----------------------------------------
+ NAME
+       msync - synchronize a file with a memory map
+
+ SYNOPSIS
+       #include <sys/mman.h>
+
+       int msync(void *addr, size_t length, int flags);
+ 
+ msync()和fsync()类似，用于同步被修改的数据，只不过 msync()用于更新映射内存区。
+
+----------------------------------------
+注意： msync向对应的文件写入时，被写入的文件有多大，就写入多少；所以，如果更新的内容大于原来文件的大小，这时候
+    我们需要先设置大小。
+NAME
+       truncate, ftruncate - truncate a file to a specified length
+
+SYNOPSIS
+       #include <unistd.h>
+       #include <sys/types.h>
+
+       int truncate(const char *path, off_t length);
+       int ftruncate(int fd, off_t length);
+----------------------------------------
+在《UNIX高级编程》 P394
+
+========================================
+   数据被写入文件的确切时间依赖于系统的页管理算法。某些系统设置了守护进程，在系统运行期间，它会在适当的时候将脏页写道磁盘上。 如果
+想要确保数据安全地写到文件中，则需要在进程终止前 以 MS_SYNC 标志调用 msync。
+
+----------------------------------------
+    将一个普通文件复制到另一个普通文件中时，存储映射I/O比较快。 但是有一些限制，例如，不能用其在某些设备(比如网络设备或终端设备)
+之间进行复制，并且在对被复制的文件进行映射后，也要注意该文件的长度是否改变。 
+    某些应用程序会从存储映射I/O得到好处，因为它处理的是存储空间而不是读、写一个文件，所以常常简化算法。 从存储映射I/O中得益的一个
+例子是对帧缓冲区设备的操作，该设备引用一个文图式显示(bit-mapped display).
